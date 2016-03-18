@@ -1,0 +1,21 @@
+{
+  "name": "ES6 Front-end Project boilerplate",
+  "author": "Daniel Morgan <me@danielmorgan.co.uk>",
+  "private": true,
+  "dependencies": {
+    "bootstrap-sass": "^3.3.6"
+  },
+  "devDependencies": {
+    "babel-preset-es2015": "^6.5.0",
+    "babelify": "^7.2.0",
+    "browser-sync": "^2.11.1",
+    "browserify": "^10.2.0",
+    "debowerify": "^1.3.1",
+    "gulp": "^3.9.1",
+    "gulp-plumber": "^1.0.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-sass": "^2.1.0",
+    "gulp-sourcemaps": "^1.6.0",
+    "through2": "^0.6.5"
+  }
+}
