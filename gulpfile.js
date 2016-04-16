@@ -1,56 +1,53 @@
 var gulp        = require('gulp'),
     through2    = require('through2'),
     browserify  = require('browserify'),
+    babelify    = require('babelify'),
     sass        = require('gulp-sass'),
     sourcemaps  = require('gulp-sourcemaps'),
     plumber     = require('gulp-plumber'),
     rename      = require('gulp-rename'),
-    babelify    = require('babelify'),
-    debowerify  = require('debowerify'),
     browserSync = require('browser-sync').create(),
-    clean       = require('gulp-clean');
+    clean       = require('gulp-clean'),
+    watchify    = require('watchify'),
+    buffer      = require('vinyl-buffer'),
+    assign      = require('lodash.assign');
 
 var paths = {
     src: './src/',
     dist: './dist/',
 
-    scriptsEntrypoint: './src/scripts/index.js',
+    scriptsEntryPoint: './src/scripts/index.js',
     stylesEntryPoint: './src/styles/index.scss',
 
     imageDir: 'img/',
 
     scripts: 'scripts/**/*.js',
     styles: 'styles/**/*.scss',
-    html: ['index.html'],
+    html: ['./src/index.html'],
     images: 'img/**/*'
 };
 
 
 gulp.task('scripts', ['clean-scripts'], function() {
-    return gulp.src(paths.scriptsEntrypoint)
+    return gulp.src(paths.scriptsEntryPoint)
         .pipe(plumber())
         .pipe(through2.obj(function(file, enc, next) {
-            browserify(file.path, { debug: true })
+            browserify(file.path, assign({ debug: true }, watchify.args))
+                .plugin(watchify, { ignoreWatch: ['**/node_modules/**'] })
                 .transform('babelify', { presets: ['es2015'] })
-                .transform('debowerify')
-                .bundle(function(err, res) {
-                    if (err) {
-                        return next(err);
-                    }
-                    file.contents = res;
-                    next(null, file);
-                });
+                .bundle(function(err, res) { if (err) { return next(err); } file.contents = res; next(null, file); });
         }))
         .on('error', function (error) {
             console.log(error.stack);
             this.emit('end')
         })
+        .pipe(buffer())
         .pipe(rename('build.js'))
         .pipe(gulp.dest(paths.dist))
         .pipe(browserSync.stream());
 });
 gulp.task('clean-scripts', function() {
-    return gulp.src(paths.dist + 'build.js', { read: false })
+    return gulp.src([paths.dist + 'build.js', paths.dist + 'build.js.map'], { read: false })
         .pipe(plumber())
         .pipe(clean());
 });
@@ -74,7 +71,7 @@ gulp.task('clean-styles', function() {
 
 
 gulp.task('html', ['clean-html'], function() {
-    return gulp.src(paths.src + paths.html)
+    return gulp.src(paths.html)
         .pipe(plumber())
         .pipe(gulp.dest(paths.dist))
         .pipe(browserSync.stream());
